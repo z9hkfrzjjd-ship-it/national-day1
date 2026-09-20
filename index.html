@@ -220,6 +220,7 @@
     display:block; width:5px; border-radius:3px;
     background:var(--gold-light);
     animation: bounce 1.2s ease-in-out infinite;
+    animation-play-state: paused;
   }
   .wave span:nth-child(1){height:18px; animation-delay:0s;}
   .wave span:nth-child(2){height:36px; animation-delay:.1s;}
@@ -242,6 +243,21 @@
     border:1px dashed var(--line); border-radius:8px;
     font-size:.92rem; color:var(--gold-light);
   }
+  .anthem-play{
+    display:inline-flex; align-items:center; gap:10px;
+    background:rgba(246,241,226,.08);
+    border:1px solid var(--line);
+    color:var(--cream);
+    font-family:'Tajawal',sans-serif;
+    font-size:.95rem;
+    padding:10px 22px;
+    border-radius:999px;
+    cursor:pointer;
+    margin-bottom:26px;
+    transition: background .2s ease;
+  }
+  .anthem-play:hover{background:rgba(246,241,226,.15);}
+  .anthem-play #anthem-icon{color:var(--gold-light); font-size:.85rem;}
 
   
   .quotes-band{
@@ -316,7 +332,7 @@
 </head>
 <body>
 
-  <!-- ===== HERO ===== -->
+
   <header class="hero">
     <div class="hero-inner">
       <div class="palm-wrap" aria-hidden="true">
@@ -346,7 +362,7 @@
   </header>
   <div class="sadu" aria-hidden="true"></div>
 
-  <!-- ===== قصة اليوم الوطني ===== -->
+
   <section id="story">
     <div class="wrap">
       <div class="section-head">
@@ -378,7 +394,7 @@
     </div>
   </section>
 
-  <!-- ===== نشيد الوطن ===== -->
+
   <section class="anthem">
     <div class="sadu" aria-hidden="true"></div>
     <div class="anthem-inner">
@@ -388,16 +404,21 @@
         <div class="divider"></div>
       </div>
 
-      <div class="wave" aria-hidden="true">
+      <div class="wave" id="wave" aria-hidden="true">
         <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
       </div>
+      <button class="anthem-play" id="anthem-btn" type="button" aria-pressed="false">
+        <span id="anthem-icon">▶</span>
+        <span id="anthem-label">تشغيل النشيد الوطني</span>
+      </button>
+      <audio id="anthem-audio" src="anthem.mp3" preload="none"></audio>
 
       <p>حين يُعزف النشيد الوطني في بداية كل احتفال، تقف القلوب قبل الأقدام. هو ليس مجرد ألحان تُستهل بها المناسبات، بل صوتٌ واحد يجمع الجميع — الصغير والكبير، المواطن والمقيم — على معنى واحد: الفخر بهذه الأرض.</p>
       <p>كلماته تختصر ما لا تختصره الخطب الطويلة: دعاءٌ للملك، وتحيةٌ للعلم، وعهدٌ بالوفاء للوطن. ولهذا تجد الجميع يقفون له بصمتٍ وإجلال أينما وُعزف، في المدرسة أو الملعب أو الساحة العامة.</p>
     </div>
   </section>
 
-  <!-- ===== كلام عن الوطن ===== -->
+
   <section class="quotes-band">
     <div class="wrap">
       <div class="section-head">
@@ -414,7 +435,7 @@
     </div>
   </section>
 
-  <!-- ===== كلمتي الشخصية ===== -->
+
   <section id="note" style="background:var(--surface);">
     <div class="wrap">
       <div class="section-head">
@@ -428,12 +449,12 @@
     </div>
   </section>
 
-  <!-- ===== SYMBOLS STRIP ===== -->
+
   <div class="strip" aria-hidden="true">
     <div>🌴</div><div>⚔️</div><div>🇸🇦</div>
   </div>
 
-  <!-- ===== FOOTER ===== -->
+
   <footer>
     <div class="fx" aria-hidden="true">
       <svg viewBox="0 0 46 46" fill="none" stroke="#c9a227" stroke-width="2">
@@ -449,7 +470,36 @@
 
 <script>
 (function(){
-  // Countdown to Sep 23
+  
+  var audio = document.getElementById('anthem-audio');
+  var btn = document.getElementById('anthem-btn');
+  var icon = document.getElementById('anthem-icon');
+  var label = document.getElementById('anthem-label');
+  var waveSpans = document.querySelectorAll('#wave span');
+
+  function setPlayingUI(isPlaying){
+    icon.textContent = isPlaying ? '❚❚' : '▶';
+    label.textContent = isPlaying ? 'إيقاف النشيد' : 'تشغيل النشيد الوطني';
+    btn.setAttribute('aria-pressed', isPlaying ? 'true' : 'false');
+    waveSpans.forEach(function(s){ s.style.animationPlayState = isPlaying ? 'running' : 'paused'; });
+  }
+
+  btn.addEventListener('click', function(){
+    if (audio.paused){
+      audio.play().catch(function(){
+        label.textContent = 'أضف ملف anthem.mp3 بجانب الصفحة';
+      });
+    } else {
+      audio.pause();
+    }
+  });
+  audio.addEventListener('play', function(){ setPlayingUI(true); });
+  audio.addEventListener('pause', function(){ setPlayingUI(false); });
+  audio.addEventListener('ended', function(){ setPlayingUI(false); });
+})();
+
+(function(){
+  
   var target = new Date(2026, 8, 23, 8, 0, 0);
   var now = new Date();
   if (target < now) target = new Date(now.getFullYear() + 1, 8, 23, 8, 0, 0);
@@ -471,7 +521,7 @@
   tick();
   setInterval(tick, 1000);
 
-  // Rotating quotes
+  
   var quotes = [
     { text: "وطنٌ لا نحمية لا نستحقُ العيش فية", by: "عبارة وطنية" },
     { text: "بلادي وإن جارت عليّ عزيزة وأهلي وإن ضنّوا عليّ كرام", by: "شعر عربي قديم" },
